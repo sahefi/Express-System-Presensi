@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:1234@localhost:5432/db_presensi?schema=public"
+}
+
+enum StatusEnum{
+  late
+  on_time
+}
+
+model User{
+  id            String    @id@default(uuid())
+  username      String    @unique
+  password      String    
+  created_at    DateTime  @default(now())
+  update_at     DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  staff Staff[]
+}
+
+model Staff{
+  id            String    @id@default(uuid())
+  name          String    
+  email         String    @unique
+  birth_date    DateTime
+  created_at    DateTime  @default(now())
+  update_at     DateTime  @updatedAt
+  deleted_at    DateTime?
+  id_user       String?
+  id_jabatan    String?
+
+  user User? @relation(fields: [id_user],references: [id]) 
+  jabatan Jabatan? @relation(fields: [id_jabatan],references: [id])
+
+}
+
+model Role{
+  id            String    @id@default(uuid())
+  name          String    @unique
+  created_at    DateTime  @default(now())
+  update_at     DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  jabatan Jabatan[]
+}
+
+model Jabatan {
+  id            String    @id@default(uuid())
+  name          String    @unique
+  created_at    DateTime  @default(now())
+  update_at     DateTime  @updatedAt
+  deleted_at    DateTime?
+  id_role       String?
+
+  role Role? @relation(fields: [id_role],references: [id])
+
+  staff Staff[]
+
+}
+
+model Presensi{
+  id            String    @id@default(uuid())
+  longitude     String
+  latitude      String  
+  time_in       DateTime?  
+  time_out      DateTime?
+  Status        StatusEnum?
+}
+
+model GCO{
+  id            String    @id@default(uuid())
+  name          String
+  time          DateTime
+  longitude     String
+  latitude      String  
+}
+
