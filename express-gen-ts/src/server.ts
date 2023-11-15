@@ -23,6 +23,7 @@ import { PrismaClient } from '@prisma/client';
 
 import roleController from '@src/API/Role/RoleController'
 import jabatanController from './API/Jabatan/JabatanController'
+import userController from '@src/API/User/UserController'
 
 // **** Variables **** //
 
@@ -98,6 +99,7 @@ app.get('/users', (_: Request, res: Response) => {
 
 app.use('/role',roleController)
 app.use('/jabatan',jabatanController)
+app.use('/user',userController)
 // **** Export default **** //
 
 export {prisma,app,}
