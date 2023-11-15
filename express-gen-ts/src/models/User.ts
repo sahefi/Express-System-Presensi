@@ -75,15 +75,19 @@ function isUser(arg: unknown): boolean {
   );
 }
 
-export interface IRegister {
-  username :string
+export interface ICreateUser {
   name:string
+  birth_date:string
+  username :string
   password:string
   email:string
-  birth_date:Date
   id_jabatan:string
+  id_user:string
 }
 
+export interface IListUser{
+  page:Number
+  per_page:Number}
 
 // **** Export default **** //
 

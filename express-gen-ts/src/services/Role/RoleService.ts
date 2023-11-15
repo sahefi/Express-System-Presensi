@@ -35,7 +35,6 @@ async function listRole(req:IListRole) {
     const prevPage = page-1
 
     const list = await prisma.role.findMany({
-        skip:skip,take:take,
         where:{
             deleted_at:null
         },
@@ -45,7 +44,8 @@ async function listRole(req:IListRole) {
         select:{
             id:true,
             name:true
-        }
+        },
+        skip:skip,take:take
     })
     return{
         page: page,
