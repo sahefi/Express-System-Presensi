@@ -87,8 +87,22 @@ export interface ICreateUser {
 
 export interface IListUser{
   page:Number
-  per_page:Number}
+  per_page:Number
+}
 
+export interface IUpdateUser{
+  name:string
+  birth_date:string
+  username :string
+  email:string
+  id_jabatan:string
+  id_user:string
+  id_staff:string
+}
+
+export interface ISoftDeleteUser{
+  id:string
+}
 // **** Export default **** //
 
 export default {

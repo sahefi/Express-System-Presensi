@@ -24,13 +24,15 @@ import { PrismaClient } from '@prisma/client';
 import roleController from '@src/API/Role/RoleController'
 import jabatanController from './API/Jabatan/JabatanController'
 import userController from '@src/API/User/UserController'
-
+import gcoController from '@src/API/GCO/GCoController'
 // **** Variables **** //
 
 const { body,query, param, check, validationResult } = require('express-validator');
 const app = express();
 const router = express.Router()
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  
+})
 app.locals.prisma = prisma;
 // **** Setup **** //
 
@@ -100,6 +102,7 @@ app.get('/users', (_: Request, res: Response) => {
 app.use('/role',roleController)
 app.use('/jabatan',jabatanController)
 app.use('/user',userController)
+app.use('/gco',gcoController)
 // **** Export default **** //
 
 export {prisma,app,}
