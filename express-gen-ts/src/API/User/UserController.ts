@@ -1,5 +1,5 @@
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
-import { ICreateUser, IListUser } from '@src/models/User';
+import { ICreateUser, IListUser, ISoftDeleteUser, IUpdateUser } from '@src/models/User';
 import UserService from '@src/services/User.ts/UserService';
 import express, { Request, Response } from 'express';
 
@@ -32,6 +32,51 @@ router.get('/',async(req:Request,res:Response)=>{
         const reqDto:IListUser = {page:Number(req.query.page),per_page:Number(req.query.per_page)}
         const ListUser = await UserService.ListUser(reqDto)
         res.status(HttpStatusCodes.OK).send(ListUser)
+    } catch (error) {
+        if(error.status){
+            res.status(error.status).send({
+                status:false,
+                message:error.message,
+                data:null
+            })
+        }else{
+            res.status(500).send({
+                status:false,
+                message:error.message,
+                data:null
+            })
+        }
+    }
+})
+
+router.patch('/',async(req:Request,res:Response)=>{
+    try {
+        const reqDto = req.body as IUpdateUser
+        const UpdateUser = await UserService.updateUser(reqDto)
+        res.status(HttpStatusCodes.OK).send(UpdateUser)
+
+    } catch (error) {
+        if(error.status){
+            res.status(error.status).send({
+                status:false,
+                message:error.message,
+                data:null
+            })
+        }else{
+            res.status(500).send({
+                status:false,
+                message:error.message,
+                data:null
+            })
+        }
+    }
+})
+
+router.delete('/',async(req:Request,res:Response)=>{
+    try {
+        const reqDto = req.body as ISoftDeleteUser
+        const softDeleteUser = await UserService.softDeleteUser(reqDto)
+        res.status(HttpStatusCodes.OK).send(softDeleteUser)
     } catch (error) {
         if(error.status){
             res.status(error.status).send({

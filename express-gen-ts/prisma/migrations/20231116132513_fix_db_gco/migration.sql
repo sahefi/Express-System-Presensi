@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Gco" ALTER COLUMN "time_in" SET DATA TYPE TIME,
+ALTER COLUMN "time_out" SET DATA TYPE TIME;

@@ -1,10 +1,10 @@
 import UserRepo from '@src/repos/UserRepo';
 import bcrypt from 'bcrypt'
-import { ICreateUser, IListUser, IUser } from '@src/models/User';
-import { BadRequest, RouteError } from '@src/other/classes';
+import User, { ICreateUser, IListUser, ISoftDeleteUser, IUpdateUser, IUser } from '@src/models/User';
+import { BadRequest, NotFound, RouteError } from '@src/other/classes';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 import { prisma } from '@src/server';
-import moment from 'moment';
+import moment, { now } from 'moment';
 
 
 // **** Variables **** //
@@ -127,8 +127,14 @@ async function ListUser(req:IListUser) {
   const nextPage = page + 1
   
   const list = await prisma.staff.findMany({
+    where:{
+      user:{
+        deleted_at:null
+      }
+    },
     include:{
-      user:true
+      user:true,
+      jabatan:true
     },
     orderBy:{
       user:{
@@ -145,9 +151,10 @@ async function ListUser(req:IListUser) {
       id_user:item.user?.id,
       id_staff:item.id,
       name:item.name,
-      username:item.user?.username,
+      username:item.user?.username, 
       email:item.email,
-      birth_date : birth_date
+      birth_date : birth_date,
+      name_jabatan : item.jabatan?.name || null
     }
   })
 
@@ -160,8 +167,137 @@ async function ListUser(req:IListUser) {
     message:"Succes Get List User",
     data : result
   }
-  
 }
+
+  async function updateUser(req:IUpdateUser) {
+    // const findUsername = await prisma.user.findFirst({
+    //   where:{
+    //     username:req.username
+    //   }
+    // })
+    // if(findUsername){
+    //   throw new BadRequest('Username Is Already Exist')
+    // }
+  
+    // const findEmail = await prisma.staff.findFirst({
+    //   where:{
+    //     email:req.email
+    //   }
+    // })
+    // if(findEmail){
+    //   throw new BadRequest('Email Is Already Exist')
+    // }
+    
+   
+    
+    
+    const result = await prisma.$transaction(async(tx)=>{
+      const findStaff = await prisma.staff.findUnique({
+        where:{
+          id:req.id_staff
+        },
+        include:{
+          user:true
+        }
+      }) 
+  
+      if(!findStaff){
+        throw new NotFound('Staff ID Not Found')
+      }
+      else if(!findStaff.id_user){
+        throw new NotFound('User Id Not Found In Staff')
+      }
+  
+    
+      const birth_date = moment(req.birth_date,'DD-MM-YYYY').toDate()
+      const updateStaff = await tx.staff.update({
+        where:{
+          id:req.id_staff
+        },
+        data:{
+          name:req.name,
+          email:req.email,
+          birth_date:birth_date,
+          id_jabatan:req.id_jabatan
+        },
+        include:{
+          jabatan:true
+        }
+      })
+
+      const updateUser = await tx.user.update({
+        where:{
+          id:updateStaff.id_user||undefined
+        },
+        data:{
+          username:req.username
+        }
+      })
+      return{
+        status:true,
+        message:"Succes Add User",
+        username:updateUser.username,
+        name:updateStaff.name,
+        birth_date:moment(updateStaff.birth_date).format('DD-MM-YYYY'),
+        email:updateStaff.email,
+        id_jabatan:updateStaff.id_jabatan
+      }
+    })
+    return{
+      data:result
+    }
+    }
+
+    async function softDeleteUser(req:ISoftDeleteUser) {
+
+      const result = await prisma.$transaction(async(tx)=>{
+        const now = new Date()
+      const find = await prisma.user.findUnique({
+        where:{
+          id:req.id
+        }
+      })
+
+      if(!find){
+        throw new NotFound('ID Not Found')
+      }
+
+      if(find.deleted_at != null){
+        throw new BadRequest('User Already Deleted')
+      }
+      const softDelete = await prisma.user.update({
+        where:{
+          id:req.id
+        },
+        data:{
+          deleted_at:now,
+        }
+
+    })
+    if(softDelete){
+      const softDeleteStaff = await prisma.staff.updateMany({
+        where:{
+          id_user:softDelete.id
+        },
+        data:{
+          deleted_at:now
+        }
+        })
+      }
+      return{
+        status:true,
+        message:"Succes Delete User",
+        data:null
+      }
+    })
+      
+
+      
+      return{
+        data:result
+      }
+    }
+  
 
 // **** Export default **** //
 
@@ -171,5 +307,7 @@ export default {
   updateOne,
   delete: _delete,
   CreateUser,
-  ListUser
+  ListUser,
+  updateUser,
+  softDeleteUser
 } as const;

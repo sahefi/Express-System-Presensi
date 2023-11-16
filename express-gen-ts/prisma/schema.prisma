@@ -75,10 +75,11 @@ model Presensi{
   Status        StatusEnum?
 }
 
-model GCO{
+model Gco{
   id            String    @id@default(uuid())
   name          String
-  time          DateTime
+  time_in       DateTime  @db.Time()
+  time_out      DateTime  @db.Time()
   longitude     String
   latitude      String  
 }
