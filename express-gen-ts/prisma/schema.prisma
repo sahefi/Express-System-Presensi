@@ -40,6 +40,7 @@ model Staff{
   user User? @relation(fields: [id_user],references: [id]) 
   jabatan Jabatan? @relation(fields: [id_jabatan],references: [id])
 
+  presensi Presensi[]
 }
 
 model Role{
@@ -70,9 +71,12 @@ model Presensi{
   id            String    @id@default(uuid())
   longitude     String
   latitude      String  
-  time_in       DateTime?  
-  time_out      DateTime?
+  time_in       DateTime?  @db.Time()
+  time_out      DateTime?  @db.Time()
   Status        StatusEnum?
+  id_staff      String
+
+  staff Staff? @relation(fields: [id_staff],references: [id])
 }
 
 model Gco{
