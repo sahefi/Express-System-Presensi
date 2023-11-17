@@ -25,6 +25,7 @@ import roleController from '@src/API/Role/RoleController'
 import jabatanController from './API/Jabatan/JabatanController'
 import userController from '@src/API/User/UserController'
 import gcoController from '@src/API/GCO/GCoController'
+import absensiController from '@src/API/Absensi/AbsensiController'
 // **** Variables **** //
 
 const { body,query, param, check, validationResult } = require('express-validator');
@@ -103,6 +104,7 @@ app.use('/role',roleController)
 app.use('/jabatan',jabatanController)
 app.use('/user',userController)
 app.use('/gco',gcoController)
+app.use('/absensi',absensiController)
 // **** Export default **** //
 
 export {prisma,app,}
