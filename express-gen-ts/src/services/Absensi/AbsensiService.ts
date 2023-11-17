@@ -19,9 +19,9 @@ async function CreateAbsensi(req:ICreateAbsensi) {
     const gcoTimein = moment(validateGco?.time_in).format('HH:mm:ss')
     const gcoTimeout = moment(validateGco?.time_out).format('HH:mm:ss')
    
-    console.log(currentTime)
     const cekTimein= await prisma.presensi.findFirst({
         where:{
+            id_staff:req.id_staff,
             time_in:{
                 not:null
             },
