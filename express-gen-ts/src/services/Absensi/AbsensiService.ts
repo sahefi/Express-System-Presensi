@@ -1,5 +1,6 @@
-import { ICreateAbsensi } from "@src/models/Absensi";
-import { BadRequest } from "@src/other/classes";
+import HttpStatusCodes from "@src/constants/HttpStatusCodes";
+import { ICreateAbsensi, IReportAbsensi } from "@src/models/Absensi";
+import { BadRequest, NotFound } from "@src/other/classes";
 import { prisma } from "@src/server";
 import { DateTime } from "luxon";
 import moment from "moment";
@@ -93,6 +94,63 @@ async function CreateAbsensi(req:ICreateAbsensi) {
     }
 }
 
+async function Report(req:IReportAbsensi) {
+    const list = await prisma.presensi.findMany({
+        where:{
+            AND:[
+                {
+                    id:{
+                        mode:"insensitive",
+                        contains:req.id
+                    }
+                },
+                {
+                    Status:req.status
+                },
+                {
+                    staff:{
+                        name:{
+                            mode:"insensitive",
+                            contains:req.staff_name
+                        }
+                    }
+                }
+                ]
+        },include:{
+            staff:{
+                select:{
+                    name:true
+                }
+            }
+        },orderBy:{
+            staff:{
+                name:"asc"
+            }
+        }
+    })
+
+    if(!list){
+        throw new NotFound('ID Staff Not Found')
+    }
+
+    const result = list.map((item)=>({
+        id:item.id,
+        name:item.staff?.name,
+        time_in:item.time_in?moment(item?.time_in).format('HH:mm:ss'):"-",
+        time_out:item.time_out?moment(item?.time_out).format('HH:mm:ss'):"-",
+        latitude:item.latitude || "-",
+        longtitude:item.longitude || "-",
+        status:item?.Status==="late"?"Telat":"Tepat Waktu"
+    })) 
+
+    return{
+        status:true,
+        code:HttpStatusCodes.OK,
+        message:"Success",
+        data:result
+    }
+}
 export default {
-    CreateAbsensi
+    CreateAbsensi,
+    Report
 }
