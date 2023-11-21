@@ -1,9 +1,10 @@
 import HttpStatusCodes from "@src/constants/HttpStatusCodes";
-import { ICreateAbsensi, IReportAbsensi } from "@src/models/Absensi";
+import { ICreateAbsensi, IReportAbsensi, IReportByStaff } from "@src/models/Absensi";
 import { BadRequest, NotFound } from "@src/other/classes";
 import { prisma } from "@src/server";
 import { DateTime } from "luxon";
 import moment from "moment";
+import jwt from 'jsonwebtoken';
 
 async function CreateAbsensi(req:ICreateAbsensi) {
     console.log(req)
@@ -94,6 +95,7 @@ async function CreateAbsensi(req:ICreateAbsensi) {
     }
 }
 
+
 async function Report(req:IReportAbsensi) {
     const list = await prisma.presensi.findMany({
         where:{
@@ -150,7 +152,46 @@ async function Report(req:IReportAbsensi) {
         data:result
     }
 }
+
+
+async function ReportByStaff(req:IReportByStaff) {
+    
+    const report = await prisma.staff.findUnique({
+        where:{
+            id:req.id
+        },include:{
+            presensi:true
+        }
+    })
+
+    if(!report){
+        throw new NotFound("ID Staff Not Found")
+    }
+    
+
+    const result = {
+        id_staff:report.id,
+        name_staff:report.name,
+        presensi : report.presensi.map((item)=>({
+            time_in:item.time_in?moment(item?.time_in).format('HH:mm:ss'):"-",
+            time_out:item.time_out?moment(item?.time_out).format('HH:mm:ss'):"-",
+            longitude:item.longitude,
+            latitude:item.latitude
+        }))
+    }
+
+    return{
+        status:true,
+        message:"Succes",
+        code:200,
+        data:{
+            report:result
+        }
+    }
+    
+}
 export default {
     CreateAbsensi,
-    Report
+    Report,
+    ReportByStaff
 }

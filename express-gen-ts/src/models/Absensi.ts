@@ -13,3 +13,7 @@ export interface IReportAbsensi{
 
 }
 
+export interface IReportByStaff{
+    id:string,
+}
+

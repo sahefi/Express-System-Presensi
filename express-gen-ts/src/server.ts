@@ -18,7 +18,7 @@ import EnvVars from '@src/constants/EnvVars';
 import HttpStatusCodes from '@src/constants/HttpStatusCodes';
 
 import { NodeEnvs } from '@src/constants/misc';
-import { BadRequest, NotFound, RouteError } from '@src/other/classes';
+import { BadRequest, NotFound, RouteError, Unauthorized } from '@src/other/classes';
 import { PrismaClient } from '@prisma/client';
 
 import roleController from '@src/API/Role/RoleController'
@@ -26,6 +26,7 @@ import jabatanController from './API/Jabatan/JabatanController'
 import userController from '@src/API/User/UserController'
 import gcoController from '@src/API/GCO/GCoController'
 import absensiController from '@src/API/Absensi/AbsensiController'
+import authController from '@src/API/Auth/AuthController'
 // **** Variables **** //
 
 const { body,query, param, check, validationResult } = require('express-validator');
@@ -76,6 +77,9 @@ app.use((
   else if (err instanceof NotFound){
     status = HttpStatusCodes.NOT_FOUND
   }
+  else if (err instanceof Unauthorized){
+    status = HttpStatusCodes.UNAUTHORIZED
+  }
   return res.status(status).json({ error: err.message });
 });
 
@@ -105,6 +109,7 @@ app.use('/jabatan',jabatanController)
 app.use('/user',userController)
 app.use('/gco',gcoController)
 app.use('/absensi',absensiController)
+app.use('/auth',authController)
 // **** Export default **** //
 
 export {prisma,app,}
